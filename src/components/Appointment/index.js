@@ -48,6 +48,8 @@ export default function Appointment(props) {
   return (
     <article className="appointment" data-testid="appointment">
       <Header time={props.time} />
+      {mode === SAVING && <Status message="Saving" />}
+      {mode === DELETING && <Status message="Deleting" />}
       {mode === EMPTY && <Empty onAdd={() => transition(CREATE)} />}
       {mode === SHOW && (
         <Show
@@ -74,8 +76,7 @@ export default function Appointment(props) {
           }}
         />
       )}
-      {mode === SAVING && <Status message="Saving" />}
-      {mode === DELETING && <Status message={"Deleting"} />}
+
       {mode === ERROR_SAVE && (
         <Error message={"Can't save appointment!"} onClose={back} />
       )}

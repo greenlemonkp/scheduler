@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import DayList from "components/DayList";
 
 export default function useApplicationData() {
   const [state, setState] = useState({
@@ -11,9 +12,9 @@ export default function useApplicationData() {
 
   useEffect(() => {
     Promise.all([
-      axios.get("http://localhost:8001/api/days"),
-      axios.get("http://localhost:8001/api/appointments"),
-      axios.get("http://localhost:8001/api/interviewers"),
+      axios.get("/api/days"),
+      axios.get("/api/appointments"),
+      axios.get("/api/interviewers"),
     ])
       .then((all) => {
         const days = all[0].data;
@@ -46,8 +47,15 @@ export default function useApplicationData() {
       state.appointments[id].interview !== null &&
       appointment.interview === null
     ) {
-      const currentDay = state.days.find((day) => day.name === state.day);
-      currentDay.spots++;
+      const days = state.days.map((day) => {
+        if (day.name === state.day) {
+          return { ...day, spots: day.spots + 1 };
+        } else {
+          return day;
+        }
+      });
+
+      setState((prev) => ({ ...prev, days: days }));
     }
   };
 
@@ -81,7 +89,7 @@ export default function useApplicationData() {
 
     updateSpotsOnDelete(appointment, id);
     return axios.delete(`/api/appointments/${appointment.id}`).then(() => {
-      setState({ ...state, appointments });
+      setState((prev) => ({ ...prev, appointments }));
     });
   }
 

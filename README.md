@@ -1,5 +1,7 @@
 # Interview Scheduler
 
+React application that allows users to book an appointment with interviewers. It also features "Edit" and "Cancel".
+
 ## Setup
 
 Install dependencies with `npm install`.

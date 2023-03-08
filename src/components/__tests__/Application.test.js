@@ -42,6 +42,7 @@ describe("Application", () => {
     });
 
     fireEvent.click(getByAltText(appointment, "Sylvia Palmer"));
+
     fireEvent.click(getByText(appointment, "Save"));
 
     expect(getByText(appointment, "Saving")).toBeInTheDocument();
@@ -67,7 +68,7 @@ describe("Application", () => {
       (appointment) => queryByText(appointment, "Archie Cohen")
     );
 
-    fireEvent.click(queryByAltText(appointment, "Delete"));
+    await fireEvent.click(queryByAltText(appointment, "Delete"));
 
     // 4. Check that the confirmation message is shown.
     expect(
@@ -75,8 +76,7 @@ describe("Application", () => {
     ).toBeInTheDocument();
 
     // 5. Click the "Confirm" button on the confirmation.
-    fireEvent.click(getByText(appointment, "Confirm"));
-    console.log(appointment.innerHTML);
+    await fireEvent.click(getByText(appointment, "Confirm"));
     // 6. Check that the element with the text "Deleting" is displayed.
     expect(getByText(appointment, "Deleting")).toBeInTheDocument();
 
@@ -84,7 +84,7 @@ describe("Application", () => {
     await waitForElement(() => getByAltText(appointment, "Add"));
 
     // // 8. Check that the DayListItem with the text "Monday" also has the text "2 spots remaining".
-    // expect(queryByText(appointment, "Deleting")).not.toBeInTheDocument();
+    expect(queryByText(appointment, "Deleting")).not.toBeInTheDocument();
 
     const day = getAllByTestId(container, "day").find((day) =>
       queryByText(day, "Monday")

@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import DayList from "components/DayList";
 
 export default function useApplicationData() {
   const [state, setState] = useState({
@@ -30,35 +29,6 @@ export default function useApplicationData() {
 
   const setDay = (day) => setState({ ...state, day });
 
-  // to update spots when save
-  const updateSpotsOnSave = (appointment, id) => {
-    if (
-      state.appointments[id].interview === null &&
-      appointment.interview !== null
-    ) {
-      const currentDay = state.days.find((day) => day.name === state.day);
-      currentDay.spots--;
-    }
-  };
-
-  // to update spots when delete
-  const updateSpotsOnDelete = (appointment, id) => {
-    if (
-      state.appointments[id].interview !== null &&
-      appointment.interview === null
-    ) {
-      const days = state.days.map((day) => {
-        if (day.name === state.day) {
-          return { ...day, spots: day.spots + 1 };
-        } else {
-          return day;
-        }
-      });
-
-      setState((prev) => ({ ...prev, days: days }));
-    }
-  };
-
   // book new interview
   function bookInterview(id, interview) {
     const appointment = {
@@ -69,10 +39,11 @@ export default function useApplicationData() {
       ...state.appointments,
       [id]: appointment,
     };
-    updateSpotsOnSave(appointment, id);
 
     return axios.put(`/api/appointments/${id}`, { interview }).then(() => {
-      setState((prev) => ({ ...prev, appointments }));
+      const days = updateSpots(id, appointments);
+
+      setState((prev) => ({ ...prev, appointments, days }));
     });
   }
 
@@ -87,10 +58,30 @@ export default function useApplicationData() {
       [id]: appointment,
     };
 
-    updateSpotsOnDelete(appointment, id);
     return axios.delete(`/api/appointments/${appointment.id}`).then(() => {
-      setState((prev) => ({ ...prev, appointments }));
+      const days = updateSpots(id, appointments);
+
+      setState((prev) => ({ ...prev, appointments, days }));
     });
+  }
+
+  function updateSpots(id, appointments) {
+    let counter = 0;
+    const days = state.days;
+
+    const index = days.findIndex((day) => {
+      return day.name === state.day;
+    });
+
+    for (const appointmentId of days[index].appointments) {
+      if (appointments[appointmentId].interview === null) {
+        counter++;
+      }
+    }
+    const dayState = [...state.days];
+    dayState[index] = { ...dayState[index], spots: counter };
+
+    return dayState;
   }
 
   return { state, setDay, bookInterview, cancelInterview };
